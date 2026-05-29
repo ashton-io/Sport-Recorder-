@@ -1,18 +1,12 @@
 # 🏟 ScoreKeep Pro
 
-A fully-featured, offline-capable, multi-sport scorekeeping Progressive Web App (PWA) — deployable to GitHub Pages with zero configuration.
-
-![ScoreKeep Pro Screenshot](screenshot-placeholder.png)
-
-> **Live Demo:** `https://yourusername.github.io/scoreboard/`
+A fully-featured, offline-capable, multi-sport scorekeeping Progressive Web App (PWA)
 
 ---
 
 ## ✨ Features at a Glance
 
 - **6 built-in sports** — Pickleball, Volleyball, Tennis, Basketball, Soccer, and Custom
-- **Full offline support** via Service Worker
-- **User accounts** with SHA-256 password hashing (Web Crypto API)
 - **Statistics dashboard** with Canvas-drawn charts
 - **Tournament bracket** generator (4 / 8 / 16 teams)
 - **Custom sport creator** with export/import
@@ -27,38 +21,6 @@ A fully-featured, offline-capable, multi-sport scorekeeping Progressive Web App 
 - **Fully keyboard-accessible** (WCAG AA)
 - **PWA installable** — Add to Home Screen on iOS/Android
 
----
-
-## 🚀 GitHub Pages Setup (5 steps)
-
-1. **Fork or clone** this repository
-2. Copy all files into your repo root (or a subfolder like `/scoreboard`)
-3. Go to your repo → **Settings → Pages**
-4. Under **Source**, select `main` branch → `/root` (or your subfolder)
-5. Click **Save** — your site will be live at `https://yourusername.github.io/scoreboard/`
-
-> ✅ No build step. No npm install. No server required. It works immediately.
-
-### Subfolder deployment
-
-If deploying to a subfolder (e.g. `username.github.io/scoreboard/`), all paths in the code are already relative — nothing needs to change.
-
----
-
-## 📁 File Structure
-
-```
-scoreboard/
-├── index.html      — App shell and all UI markup
-├── style.css       — Full stylesheet (dark/light themes, responsive)
-├── script.js       — Game logic, UI, sports, charts, tournament
-├── accounts.js     — Auth, profiles, stats, IndexedDB, achievements
-├── manifest.json   — PWA manifest (Add to Home Screen)
-├── sw.js           — Service Worker for offline support
-└── README.md       — This file
-```
-
----
 
 ## 🎮 Sports & Default Rules
 
