@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="ScoreKeep Pro — Multi-sport scorekeeping for everyone" />
+  <meta name="theme-color" content="#0f0f14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ScoreKeep" />
+  <title>ScoreKeep Pro</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Fonts: Bebas Neue (display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- ========== CONFETTI CANVAS ========== -->
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <!-- ========== TOAST NOTIFICATIONS ========== -->
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ========== ACHIEVEMENT POPUP ========== -->
+  <div id="achievement-popup" class="achievement-popup" aria-live="assertive" hidden>
+    <div class="achievement-inner">
+      <span class="achievement-icon" id="ach-icon">🏆</span>
+      <div class="achievement-text">
+        <div class="achievement-label">Achievement Unlocked!</div>
+        <div class="achievement-name" id="ach-name"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== AUTH MODAL ========== -->
+  <div id="auth-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <div class="modal-box auth-modal-box">
+      <button class="modal-close" id="auth-modal-close" aria-label="Close">&times;</button>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Sign In</button>
+        <button class="auth-tab" data-tab="signup">Create Account</button>
+      </div>
+      <!-- Login Form -->
+      <div id="tab-login" class="auth-form">
+        <h2 id="auth-title" class="auth-heading">Welcome Back</h2>
+        <div class="form-group">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" autocomplete="username" placeholder="your_username" />
+          <span class="field-error" id="login-username-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••" />
+          <span class="field-error" id="login-password-err"></span>
+        </div>
+        <div class="form-error" id="login-error"></div>
+        <button class="btn btn-primary btn-full" id="login-submit">Sign In</button>
+        <button class="btn btn-ghost btn-full" id="guest-login">Continue as Guest</button>
+      </div>
+      <!-- Signup Form -->
+      <div id="tab-signup" class="auth-form" hidden>
+        <h2 class="auth-heading">Create Account</h2>
+        <div class="form-group">
+          <label for="signup-username">Username</label>
+          <input type="text" id="signup-username" autocomplete="username" placeholder="choose_username" />
+          <span class="field-error" id="signup-username-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="signup-display">Display Name</label>
+          <input type="text" id="signup-display" autocomplete="name" placeholder="Your Name" />
+          <span class="field-error" id="signup-display-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <input type="password" id="signup-password" autocomplete="new-password" placeholder="min 6 characters" />
+          <span class="field-error" id="signup-password-err"></span>
+        </div>
+        <div class="form-error" id="signup-error"></div>
+        <button class="btn btn-primary btn-full" id="signup-submit">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PROFILE DRAWER ========== -->
+  <div id="profile-drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-label="Profile">
+    <div class="drawer-inner">
+      <div class="drawer-header">
+        <h3>Profile</h3>
+        <button class="modal-close" id="drawer-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="profile-summary">
+        <div class="avatar-display" id="drawer-avatar">😊</div>
+        <div>
+          <div class="profile-name" id="drawer-display-name">Guest</div>
+          <div class="profile-username" id="drawer-username">@guest</div>
+        </div>
+      </div>
+      <nav class="drawer-nav">
+        <button class="drawer-nav-item active" data-section="scoreboard"><span>🏟</span> Scoreboard</button>
+        <button class="drawer-nav-item" data-section="dashboard"><span>📊</span> Dashboard</button>
+        <button class="drawer-nav-item" data-section="saves"><span>💾</span> Saved Games</button>
+        <button class="drawer-nav-item" data-section="presets"><span>⚙️</span> Rule Presets</button>
+        <button class="drawer-nav-item" data-section="tournament"><span>🏆</span> Tournament</button>
+        <button class="drawer-nav-item" data-section="custom-sports"><span>🎨</span> Custom Sports</button>
+        <button class="drawer-nav-item" data-section="profile-edit"><span>✏️</span> Edit Profile</button>
+        <button class="drawer-nav-item" data-section="profile-switch"><span>👥</span> Switch Profile</button>
+      </nav>
+      <div class="drawer-footer">
+        <button class="btn btn-ghost btn-sm" id="drawer-logout">Sign Out</button>
+        <button class="btn btn-ghost btn-sm" id="theme-toggle-drawer" aria-label="Toggle theme">🌙 Dark</button>
+      </div>
+    </div>
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+  </div>
+
+  <!-- ========== SETTINGS PANEL ========== -->
+  <div id="settings-panel" class="settings-panel" hidden role="dialog" aria-modal="true" aria-label="Match Settings">
+    <div class="settings-inner">
+      <div class="settings-header">
+        <h3>Match Settings</h3>
+        <button class="modal-close" id="settings-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="settings-body" id="settings-body">
+        <!-- Dynamically populated -->
+      </div>
+      <div class="settings-footer">
+        <button class="btn btn-primary" id="settings-apply">Apply Settings</button>
+        <button class="btn btn-ghost" id="settings-cancel">Cancel</button>
+      </div>
+    </div>
+    <div class="settings-backdrop" id="settings-backdrop"></div>
+  </div>
+
+  <!-- ========== KEYBOARD SHORTCUTS MODAL ========== -->
+  <div id="shortcuts-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
+    <div class="modal-box">
+      <button class="modal-close" id="shortcuts-close" aria-label="Close">&times;</button>
+      <h2 id="shortcuts-title">Keyboard Shortcuts</h2>
+      <div class="shortcuts-grid">
+        <div class="shortcut-row"><kbd>1</kbd><span>+1 point Team A</span></div>
+        <div class="shortcut-row"><kbd>2</kbd><span>+1 point Team B</span></div>
+        <div class="shortcut-row"><kbd>Q</kbd><span>Undo last action</span></div>
+        <div class="shortcut-row"><kbd>R</kbd><span>Reset match</span></div>
+        <div class="shortcut-row"><kbd>Space</kbd><span>Start/Pause timer</span></div>
+        <div class="shortcut-row"><kbd>S</kbd><span>Quick save</span></div>
+        <div class="shortcut-row"><kbd>T</kbd><span>Toggle theme</span></div>
+        <div class="shortcut-row"><kbd>?</kbd><span>Show shortcuts</span></div>
+        <div class="shortcut-row"><kbd>Esc</kbd><span>Close modal/panel</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== RESET CONFIRM MODAL ========== -->
+  <div id="reset-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="reset-title">
+    <div class="modal-box modal-box-sm">
+      <h2 id="reset-title">Reset Match?</h2>
+      <p>This will clear all scores and history. This cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="reset-confirm">Reset</button>
+        <button class="btn btn-ghost" id="reset-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== WIN SCREEN ========== -->
+  <div id="win-screen" class="win-screen" hidden role="dialog" aria-modal="true" aria-labelledby="win-title">
+    <div class="win-inner">
+      <div class="win-trophy">🏆</div>
+      <h1 id="win-title" class="win-title">Match Over!</h1>
+      <div class="win-winner" id="win-winner-name"></div>
+      <div class="win-score" id="win-final-score"></div>
+      <div class="win-duration" id="win-duration"></div>
+      <div class="win-history" id="win-history-list"></div>
+      <div class="win-actions">
+        <button class="btn btn-primary" id="win-share">📤 Share Result</button>
+        <button class="btn btn-secondary" id="win-new-match">New Match</button>
+        <button class="btn btn-ghost" id="win-view-stats">View Stats</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MAIN APP SHELL ========== -->
+  <div id="app" class="app-shell">
+
+    <!-- TOP NAV (desktop) -->
+    <header class="top-nav" id="top-nav">
+      <div class="top-nav-left">
+        <button class="nav-menu-btn" id="menu-btn" aria-label="Open menu">
+          <span class="hamburger"></span>
+        </button>
+        <a class="app-logo" href="#" id="logo-link">
+          <span class="logo-icon">🏟</span>
+          <span class="logo-text">ScoreKeep<em>Pro</em></span>
+        </a>
+      </div>
+      <nav class="top-nav-center desktop-only">
+        <button class="nav-tab active" data-section="scoreboard">Scoreboard</button>
+        <button class="nav-tab" data-section="dashboard">Dashboard</button>
+        <button class="nav-tab" data-section="saves">Saves</button>
+        <button class="nav-tab" data-section="tournament">Tournament</button>
+      </nav>
+      <div class="top-nav-right">
+        <button class="btn btn-ghost btn-icon" id="shortcuts-btn" title="Keyboard Shortcuts (?)">⌨️</button>
+        <button class="btn btn-ghost btn-icon" id="theme-toggle" aria-label="Toggle theme" title="Toggle Theme (T)">🌙</button>
+        <button class="btn btn-ghost btn-icon" id="sound-toggle" aria-label="Toggle sound" title="Toggle Sound">🔊</button>
+        <button class="btn btn-accent" id="profile-btn" aria-label="Open profile">
+          <span id="profile-avatar-nav">😊</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ========== SECTIONS ========== -->
+
+    <!-- SCOREBOARD SECTION -->
+    <section id="section-scoreboard" class="app-section active" aria-label="Scoreboard">
+
+      <!-- Sport selector -->
+      <div class="sport-selector-bar">
+        <div class="sport-scroll" id="sport-scroll" role="tablist" aria-label="Select sport">
+          <!-- Populated by JS -->
+        </div>
+        <button class="btn btn-ghost btn-sm sport-custom-btn" id="add-custom-sport-btn" title="Add custom sport">+ Custom</button>
+      </div>
+
+      <!-- Active match card -->
+      <div class="scoreboard-container">
+
+        <!-- Match header -->
+        <div class="match-header">
+          <div class="match-sport-badge" id="match-sport-badge">🏓 Pickleball</div>
+          <div class="match-format-badge" id="match-format-badge">Race to 11 · Win by 2</div>
+          <button class="btn btn-ghost btn-sm" id="settings-open-btn" aria-label="Open settings">⚙ Settings</button>
+        </div>
+
+        <!-- Sets tracker -->
+        <div class="sets-tracker" id="sets-tracker" hidden>
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Main scoreboard -->
+        <div class="main-scoreboard" id="main-scoreboard">
+          <!-- Team A -->
+          <div class="team-card team-a" id="team-a-card">
+            <div class="serve-indicator" id="serve-a" aria-label="Serving"></div>
+            <div class="team-name-wrap">
+              <span class="team-name" id="team-a-name" contenteditable="true" spellcheck="false" role="textbox" aria-label="Team A name">Team A</span>
+            </div>
+            <div class="score-display" id="score-a" aria-label="Team A score" aria-live="polite">0</div>
+            <div class="score-buttons">
+              <button class="score-btn score-minus" data-team="a" data-delta="-1" aria-label="Remove 1 point from Team A">−</button>
+              <button class="score-btn score-plus" data-team="a" data-delta="1" aria-label="Add 1 point to Team A">+1</button>
+              <button class="score-btn score-plus2" data-team="a" data-delta="2" aria-label="Add 2 points to Team A" id="plus2-a">+2</button>
+              <button class="score-btn score-plus3" data-team="a" data-delta="3" aria-label="Add 3 points to Team A" id="plus3-a">+3</button>
+            </div>
+          </div>
+
+          <!-- VS divider -->
+          <div class="vs-divider">
+            <div class="vs-text">VS</div>
+            <div class="match-point-badge" id="match-point-badge" hidden>Match Point!</div>
+          </div>
+
+          <!-- Team B -->
+          <div class="team-card team-b" id="team-b-card">
+            <div class="serve-indicator" id="serve-b" aria-label="Serving"></div>
+            <div class="team-name-wrap">
+              <span class="team-name" id="team-b-name" contenteditable="true" spellcheck="false" role="textbox" aria-label="Team B name">Team B</span>
+            </div>
+            <div class="score-display" id="score-b" aria-label="Team B score" aria-live="polite">0</div>
+            <div class="score-buttons">
+              <button class="score-btn score-minus" data-team="b" data-delta="-1" aria-label="Remove 1 point from Team B">−</button>
+              <button class="score-btn score-plus" data-team="b" data-delta="1" aria-label="Add 1 point to Team B">+1</button>
+              <button class="score-btn score-plus2" data-team="b" data-delta="2" aria-label="Add 2 points to Team B" id="plus2-b">+2</button>
+              <button class="score-btn score-plus3" data-team="b" data-delta="3" aria-label="Add 3 points to Team B" id="plus3-b">+3</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timer bar -->
+        <div class="timer-bar" id="timer-bar">
+          <div class="timer-display" id="timer-display" aria-live="polite" aria-label="Match timer">00:00</div>
+          <div class="timer-controls">
+            <button class="btn btn-ghost btn-sm" id="timer-start-pause" aria-label="Start/pause timer">▶ Start</button>
+            <button class="btn btn-ghost btn-sm" id="timer-reset" aria-label="Reset timer">↺ Reset</button>
+          </div>
+        </div>
+
+        <!-- Match controls -->
+        <div class="match-controls">
+          <button class="btn btn-ghost btn-sm" id="undo-btn" aria-label="Undo last action" title="Undo (Q)">↩ Undo</button>
+          <button class="btn btn-ghost btn-sm" id="save-btn" aria-label="Save game" title="Save (S)">💾 Save</button>
+          <button class="btn btn-ghost btn-sm" id="share-btn" aria-label="Share score" title="Share">📤 Share</button>
+          <button class="btn btn-danger btn-sm" id="reset-btn" aria-label="Reset match" title="Reset (R)">🔄 Reset</button>
+        </div>
+
+        <!-- Side switch indicator -->
+        <div class="side-switch-banner" id="side-switch-banner" hidden>
+          <span>⬌ Switch Sides!</span>
+        </div>
+
+      </div>
+
+      <!-- Match history log -->
+      <div class="history-card">
+        <div class="history-header">
+          <h3 class="history-title">Match Log</h3>
+          <button class="btn btn-ghost btn-sm" id="history-clear-btn">Clear</button>
+        </div>
+        <ol class="history-list" id="history-list" aria-label="Match history" reversed>
+          <li class="history-empty">No actions yet. Start scoring!</li>
+        </ol>
+      </div>
+
+    </section>
+
+    <!-- DASHBOARD SECTION -->
+    <section id="section-dashboard" class="app-section" aria-label="Dashboard" hidden>
+      <div class="section-header">
+        <h2 class="section-title">Dashboard</h2>
+        <div class="profile-mini" id="dashboard-profile-mini"></div>
+      </div>
+
+      <!-- Stats overview -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">Matches Played</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-wins">0</div>
+          <div class="stat-label">Wins</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-winrate">0%</div>
+          <div class="stat-label">Win Rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-streak">0</div>
+          <div class="stat-label">Best Streak</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-avg-duration">0m</div>
+          <div class="stat-label">Avg Duration</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-favorite">—</div>
+          <div class="stat-label">Favorite Sport</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3 class="chart-title">Wins by Sport</h3>
+          <canvas id="chart-wins-by-sport" width="400" height="220"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Recent Activity (Last 20)</h3>
+          <canvas id="chart-recent-activity" width="400" height="220"></canvas>
+        </div>
+      </div>
+
+      <!-- Achievements -->
+      <div class="achievements-section">
+        <h3 class="section-subtitle">Achievements</h3>
+        <div class="achievements-grid" id="achievements-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Recent matches -->
+      <div class="recent-matches-section">
+        <h3 class="section-subtitle">Recent Matches</h3>
+        <div id="recent-matches-list">
+          <div class="empty-state">
+            <div class="empty-icon">🏟</div>
+            <div class="empty-text">No matches yet. Start playing!</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SAVES SECTION -->
+    <section id="section-saves" class="app-section" aria-label="Saved Games" hidden>
+      <div class="section-header">
+        <h2 class="section-title">Saved Games</h2>
+        <button class="btn btn-accent btn-sm" id="quick-save-btn">+ Quick Save</button>
+      </div>
+      <div id="saves-list" class="saves-grid">
+        <div class="empty-state">
+          <div class="empty-icon">💾</div>
+          <div class="empty-text">No saved games yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRESETS SECTION -->
+    <section id="section-presets" class="app-section" aria-label="Rule Presets" hidden>
+      <div class="section-header">
+        <h2 class="section-title">Rule Presets</h2>
+        <div class="header-actions">
+          <button class="btn btn-ghost btn-sm" id="import-preset-btn">⬆ Import</button>
+          <button class="btn btn-accent btn-sm" id="new-preset-btn">+ New</button>
+        </div>
+      </div>
+      <div id="presets-list" class="presets-grid">
+        <!-- Populated by JS -->
+      </div>
+      <!-- Hidden file input for import -->
+      <input type="file" id="import-preset-file" accept=".json" hidden />
+    </section>
+
+    <!-- TOURNAMENT SECTION -->
+    <section id="section-tournament" class="app-section" aria-label="Tournament Bracket" hidden>
+      <div class="section-header">
+        <h2 class="section-title">Tournament Bracket</h2>
+        <button class="btn btn-accent btn-sm" id="new-tournament-btn">+ New Tournament</button>
+      </div>
+      <div id="tournament-setup" class="tournament-setup">
+        <div class="form-group">
+          <label for="tournament-name">Tournament Name</label>
+          <input type="text" id="tournament-name" value="My Tournament" />
+        </div>
+        <div class="form-group">
+          <label>Number of Teams</label>
+          <div class="btn-group">
+            <button class="btn btn-ghost btn-sm bracket-size-btn active" data-size="4">4 Teams</button>
+            <button class="btn btn-ghost btn-sm bracket-size-btn" data-size="8">8 Teams</button>
+            <button class="btn btn-ghost btn-sm bracket-size-btn" data-size="16">16 Teams</button>
+            <button class="btn btn-ghost btn-sm bracket-size-btn" id="bracket-size-custom-btn" data-size="custom">Custom</button>
+          </div>
+          <div id="bracket-custom-wrap" class="form-group" hidden style="margin-top:8px;">
+            <input type="number" id="bracket-size-custom-input" min="2" max="64" step="1" placeholder="Enter number of teams (2–64)" />
+          </div>
+        </div>
+        <div id="team-name-inputs" class="team-name-inputs">
+          <!-- Populated by JS -->
+        </div>
+        <button class="btn btn-primary" id="generate-bracket-btn">Generate Bracket</button>
+      </div>
+      <div id="bracket-container" class="bracket-container" hidden>
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- CUSTOM SPORTS SECTION -->
+    <section id="section-custom-sports" class="app-section" aria-label="Custom Sports" hidden>
+      <div class="section-header">
+        <h2 class="section-title">Custom Sports</h2>
+        <div class="header-actions">
+          <button class="btn btn-ghost btn-sm" id="import-sport-btn">⬆ Import</button>
+          <button class="btn btn-accent btn-sm" id="new-custom-sport-btn">+ Create</button>
+        </div>
+      </div>
+      <div id="custom-sports-list" class="custom-sports-grid">
+        <div class="empty-state">
+          <div class="empty-icon">🎨</div>
+          <div class="empty-text">No custom sports yet. Create one!</div>
+        </div>
+      </div>
+      <input type="file" id="import-sport-file" accept=".json" hidden />
+    </section>
+
+    <!-- PROFILE EDIT SECTION -->
+    <section id="section-profile-edit" class="app-section" aria-label="Edit Profile" hidden>
+      <div class="section-header">
+        <h2 class="section-title">Edit Profile</h2>
+      </div>
+      <div class="profile-edit-card">
+        <!-- Avatar selection -->
+        <div class="avatar-section">
+          <div class="avatar-preview" id="avatar-preview">😊</div>
+          <div class="avatar-picker" id="avatar-picker">
+            <!-- Emoji buttons populated by JS -->
+          </div>
+          <div class="avatar-upload-row">
+            <label class="btn btn-ghost btn-sm" for="avatar-upload">📷 Upload Image</label>
+            <input type="file" id="avatar-upload" accept="image/*" hidden />
+          </div>
+        </div>
+        <!-- Profile fields -->
+        <div class="form-group">
+          <label for="edit-display-name">Display Name</label>
+          <input type="text" id="edit-display-name" maxlength="32" />
+        </div>
+        <div class="form-group">
+          <label for="edit-username">Username</label>
+          <input type="text" id="edit-username" maxlength="20" />
+          <span class="field-error" id="edit-username-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="edit-default-sport">Default Sport</label>
+          <select id="edit-default-sport"></select>
+        </div>
+        <div class="form-group">
+          <label for="edit-accent-color">Accent Color</label>
+          <input type="color" id="edit-accent-color" value="#e94560" />
+        </div>
+        <div class="form-group">
+          <label>Theme Preference</label>
+          <div class="btn-group">
+            <button class="btn btn-ghost btn-sm pref-theme-btn active" data-theme-pref="dark">Dark</button>
+            <button class="btn btn-ghost btn-sm pref-theme-btn" data-theme-pref="light">Light</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Change Password</label>
+          <input type="password" id="edit-new-password" placeholder="New password (leave blank to keep)" />
+        </div>
+        <div class="form-error" id="profile-edit-error"></div>
+        <button class="btn btn-primary" id="save-profile-btn">Save Profile</button>
+      </div>
+    </section>
+
+    <!-- PROFILE SWITCH SECTION -->
+    <section id="section-profile-switch" class="app-section" aria-label="Switch Profile" hidden>
+      <div class="section-header">
+        <h2 class="section-title">Switch Profile</h2>
+        <button class="btn btn-accent btn-sm" id="add-profile-btn">+ Add Account</button>
+      </div>
+      <div id="profile-list" class="profile-list">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- ========== CUSTOM SPORT MODAL ========== -->
+    <div id="custom-sport-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="cs-title">
+      <div class="modal-box">
+        <button class="modal-close" id="cs-modal-close" aria-label="Close">&times;</button>
+        <h2 id="cs-title">Create Custom Sport</h2>
+        <div class="form-group">
+          <label for="cs-name">Sport Name</label>
+          <input type="text" id="cs-name" placeholder="e.g. Cornhole" maxlength="30" />
+        </div>
+        <div class="form-group">
+          <label for="cs-icon">Icon (emoji)</label>
+          <input type="text" id="cs-icon" placeholder="🎯" maxlength="4" />
+        </div>
+        <div class="form-group">
+          <label for="cs-win-score">Points to Win</label>
+          <input type="number" id="cs-win-score" value="21" min="1" max="999" />
+        </div>
+        <div class="form-group">
+          <label>Win by 2</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="cs-win-by-two" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label for="cs-sets">Number of Sets</label>
+          <input type="number" id="cs-sets" value="1" min="1" max="9" />
+        </div>
+        <div class="form-group">
+          <label>Score Increments</label>
+          <div class="check-group">
+            <label><input type="checkbox" class="cs-inc" value="1" checked /> +1</label>
+            <label><input type="checkbox" class="cs-inc" value="2" /> +2</label>
+            <label><input type="checkbox" class="cs-inc" value="3" /> +3</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Serve Tracking</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="cs-serve-track" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label>Side Switching</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="cs-side-switch" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label for="cs-notes">Custom Rules Notes</label>
+          <textarea id="cs-notes" rows="3" placeholder="Any special rules..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Tags</label>
+          <input type="text" id="cs-tags" placeholder="tournament, casual, kids (comma separated)" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="cs-save-btn">Save Sport</button>
+          <button class="btn btn-ghost btn-sm" id="cs-export-btn">Export JSON</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRESET MODAL -->
+    <div id="preset-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="pm-title">
+      <div class="modal-box">
+        <button class="modal-close" id="pm-close" aria-label="Close">&times;</button>
+        <h2 id="pm-title">Rule Preset</h2>
+        <div class="form-group">
+          <label for="pm-name">Preset Name</label>
+          <input type="text" id="pm-name" placeholder="e.g. Casual Pickleball" maxlength="40" />
+        </div>
+        <div class="form-group">
+          <label for="pm-sport">Sport</label>
+          <select id="pm-sport"></select>
+        </div>
+        <div class="form-group">
+          <label for="pm-tags">Tags</label>
+          <input type="text" id="pm-tags" placeholder="tournament, casual, kids" />
+        </div>
+        <div id="pm-rules-fields"><!-- Populated by JS --></div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="pm-save-btn">Save Preset</button>
+          <button class="btn btn-ghost btn-sm" id="pm-export-btn">Export JSON</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAV (mobile) -->
+    <nav class="bottom-nav mobile-only" aria-label="Main navigation">
+      <button class="bottom-nav-item active" data-section="scoreboard">
+        <span class="bnav-icon">🏟</span>
+        <span class="bnav-label">Score</span>
+      </button>
+      <button class="bottom-nav-item" data-section="dashboard">
+        <span class="bnav-icon">📊</span>
+        <span class="bnav-label">Stats</span>
+      </button>
+      <button class="bottom-nav-item" data-section="saves">
+        <span class="bnav-icon">💾</span>
+        <span class="bnav-label">Saves</span>
+      </button>
+      <button class="bottom-nav-item" data-section="tournament">
+        <span class="bnav-icon">🏆</span>
+        <span class="bnav-label">Bracket</span>
+      </button>
+      <button class="bottom-nav-item" id="profile-btn-mobile">
+        <span class="bnav-icon" id="profile-avatar-bottom">😊</span>
+        <span class="bnav-label">Profile</span>
+      </button>
+    </nav>
+
+  </div><!-- /app-shell -->
+
+  <!-- Hidden file input for profile image upload -->
+  <input type="file" id="global-file-input" hidden />
+
+  <!-- Scripts -->
+  <script src="accounts.js" defer></script>
+  <script src="script.js" defer></script>
+  <script>
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+
+    // Konami code easter egg
+    (function() {
+      const KONAMI = [38,38,40,40,37,39,37,39,66,65];
+      let pos = 0;
+      document.addEventListener('keydown', (e) => {
+        if (e.keyCode === KONAMI[pos]) {
+          pos++;
+          if (pos === KONAMI.length) {
+            pos = 0;
+            document.body.classList.add('party-mode');
+            if (window.launchConfetti) window.launchConfetti(300);
+            if (window.showToast) window.showToast('🎉 PARTY MODE ACTIVATED! 🎉');
+            setTimeout(() => document.body.classList.remove('party-mode'), 10000);
+          }
+        } else {
+          pos = 0;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
